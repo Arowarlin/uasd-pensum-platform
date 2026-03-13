@@ -1,0 +1,17 @@
+{
+  "id": "informatica",
+  "codigo": "40601",
+  "nombre": "Licenciatura en Informática",
+  "facultad": "Facultad de Ciencias",
+  "escuela": "Escuela de Informática",
+  "plan": "200820",
+  "nivel": "grado",
+  "modalidad": "presencial",
+  "totalHT": 135,
+  "totalHP": 64,
+  "totalHIV": 0,
+  "totalHPV": 0,
+  "totalHI": 0,
+  "totalCreditos": 186,
+  "semestres": []
+}

@@ -1,0 +1,131 @@
+{
+  "id": "informatica",
+  "codigo": "40601",
+  "nombre": "Licenciatura en Informática",
+  "facultad": "Facultad de Ciencias",
+  "escuela": "Escuela de Informática",
+  "plan": "200820",
+  "nivel": "grado",
+  "modalidad": "presencial",
+  "totalHT": 135,
+  "totalHP": 64,
+  "totalHIV": 0,
+  "totalHPV": 0,
+  "totalHI": 0,
+  "totalCreditos": 186,
+  "semestres": [
+    {
+      "numero": 1,
+      "nombre": "Primer Semestre",
+      "totalHT": 16, "totalHP": 5, "totalHIV": 0, "totalHPV": 0, "totalHI": 0, "totalCreditos": 18,
+      "asignaturas": [
+        { "clave": "BIO0140", "nombre": "Biología Básica", "horasTeoricas": 2, "horasPracticas": 2, "creditos": 3, "prerequisitos": [], "equivalencias": ["BIO0110","BIO0130"] },
+        { "clave": "DOP1000", "nombre": "Orientación Institucional", "horasTeoricas": 1, "horasPracticas": 0, "creditos": 1, "prerequisitos": [], "equivalencias": ["DOP0100"] },
+        { "clave": "HIS0110", "nombre": "Fund de Hist Social Dominicana", "horasTeoricas": 3, "horasPracticas": 0, "creditos": 3, "prerequisitos": [], "equivalencias": ["HIS1100"] },
+        { "clave": "INF2060", "nombre": "Computación Esencial", "horasTeoricas": 4, "horasPracticas": 0, "creditos": 4, "prerequisitos": [], "equivalencias": ["INF1020"] },
+        { "clave": "INF2070", "nombre": "Lab de Computación Esencial", "horasTeoricas": 0, "horasPracticas": 2, "creditos": 1, "prerequisitos": ["INF2060"], "equivalencias": ["INF1020"] },
+        { "clave": "LET0110", "nombre": "Lengua Española Básica I", "horasTeoricas": 3, "horasPracticas": 1, "creditos": 3, "prerequisitos": [], "equivalencias": ["LET0130"] },
+        { "clave": "SOC0100", "nombre": "Introd A Las Ciencias Sociales", "horasTeoricas": 3, "horasPracticas": 0, "creditos": 3, "prerequisitos": [], "equivalencias": ["ICS0110"] }
+      ]
+    },
+    {
+      "numero": 2,
+      "nombre": "Segundo Semestre",
+      "totalHT": 17, "totalHP": 5, "totalHIV": 0, "totalHPV": 0, "totalHI": 0, "totalCreditos": 19,
+      "asignaturas": [
+        { "clave": "EFS0120", "nombre": "Educación Física", "horasTeoricas": 1, "horasPracticas": 2, "creditos": 2, "prerequisitos": [], "equivalencias": ["EFI0120"] },
+        { "clave": "IDI0280", "nombre": "Inglés Elemental", "horasTeoricas": 5, "horasPracticas": 0, "creditos": 5, "prerequisitos": [], "equivalencias": ["IDI0230"] },
+        { "clave": "INF5100", "nombre": "Introducción a la Programación", "horasTeoricas": 4, "horasPracticas": 0, "creditos": 4, "prerequisitos": ["INF2060","INF2070"], "equivalencias": ["INF4110"] },
+        { "clave": "INF5110", "nombre": "Lab de Int a la Programación", "horasTeoricas": 0, "horasPracticas": 2, "creditos": 1, "prerequisitos": ["INF5100"], "equivalencias": ["INF4110"] },
+        { "clave": "LET0120", "nombre": "Lengua Española Básica II", "horasTeoricas": 3, "horasPracticas": 1, "creditos": 3, "prerequisitos": ["LET0110"], "equivalencias": ["LET0130"] },
+        { "clave": "MAT0140", "nombre": "Matemática Básica", "horasTeoricas": 4, "horasPracticas": 0, "creditos": 4, "prerequisitos": [], "equivalencias": ["MAT0120"] }
+      ]
+    },
+    {
+      "numero": 3,
+      "nombre": "Tercer Semestre",
+      "totalHT": 20, "totalHP": 10, "totalHIV": 0, "totalHPV": 0, "totalHI": 0, "totalCreditos": 24,
+      "asignaturas": [
+        { "clave": "FIL0110", "nombre": "Int a la Filosofía", "horasTeoricas": 3, "horasPracticas": 0, "creditos": 3, "prerequisitos": [], "equivalencias": [] },
+        { "clave": "FIS0140", "nombre": "Física Básica", "horasTeoricas": 3, "horasPracticas": 3, "creditos": 4, "prerequisitos": [], "equivalencias": ["FIS0120"] },
+        { "clave": "IDI0130", "nombre": "Inglés Técnico", "horasTeoricas": 4, "horasPracticas": 0, "creditos": 4, "prerequisitos": ["IDI0280"], "equivalencias": [] },
+        { "clave": "INF5120", "nombre": "Lenguaje de Programación I", "horasTeoricas": 4, "horasPracticas": 0, "creditos": 4, "prerequisitos": ["INF5100","INF5110"], "equivalencias": [] },
+        { "clave": "INF5130", "nombre": "Lab de Lenguaje de Programac I", "horasTeoricas": 0, "horasPracticas": 2, "creditos": 1, "prerequisitos": ["INF5120"], "equivalencias": [] },
+        { "clave": "MAT2330", "nombre": "Análisis Lineal Y Matricial", "horasTeoricas": 4, "horasPracticas": 2, "creditos": 5, "prerequisitos": ["MAT0140"], "equivalencias": ["MAT2300"] },
+        { "clave": "QUI0140", "nombre": "Química Básica", "horasTeoricas": 2, "horasPracticas": 3, "creditos": 3, "prerequisitos": [], "equivalencias": ["QUI0110"] }
+      ]
+    },
+    {
+      "numero": 4,
+      "nombre": "Cuarto Semestre",
+      "totalHT": 13, "totalHP": 8, "totalHIV": 0, "totalHPV": 0, "totalHI": 0, "totalCreditos": 17,
+      "asignaturas": [
+        { "clave": "FIS1150", "nombre": "Física para Informática", "horasTeoricas": 3, "horasPracticas": 0, "creditos": 3, "prerequisitos": ["FIS0140"], "equivalencias": [] },
+        { "clave": "FIS1160", "nombre": "Lab de Física para Informática", "horasTeoricas": 0, "horasPracticas": 2, "creditos": 1, "prerequisitos": ["FIS0140","FIS1150"], "equivalencias": [] },
+        { "clave": "INF5140", "nombre": "Lenguaje de Programación II", "horasTeoricas": 4, "horasPracticas": 0, "creditos": 4, "prerequisitos": ["INF5120","INF5130"], "equivalencias": [] },
+        { "clave": "INF5150", "nombre": "Lab de Lenguaje de Program II", "horasTeoricas": 0, "horasPracticas": 2, "creditos": 1, "prerequisitos": ["INF5140"], "equivalencias": [] },
+        { "clave": "INF5260", "nombre": "Estructura De Datos", "horasTeoricas": 2, "horasPracticas": 2, "creditos": 3, "prerequisitos": ["INF5120"], "equivalencias": [] },
+        { "clave": "MAT3560", "nombre": "Cálculo I", "horasTeoricas": 4, "horasPracticas": 2, "creditos": 5, "prerequisitos": ["MAT2330"], "equivalencias": ["MAT2500"] }
+      ]
+    },
+    {
+      "numero": 5,
+      "nombre": "Quinto Semestre",
+      "totalHT": 16, "totalHP": 6, "totalHIV": 0, "totalHPV": 0, "totalHI": 0, "totalCreditos": 19,
+      "asignaturas": [
+        { "clave": "EST2110", "nombre": "Estadística Básica", "horasTeoricas": 4, "horasPracticas": 2, "creditos": 5, "prerequisitos": ["MAT0140"], "equivalencias": [] },
+        { "clave": "INF2080", "nombre": "Organiz y Arq del Computador", "horasTeoricas": 4, "horasPracticas": 0, "creditos": 4, "prerequisitos": ["INF2060"], "equivalencias": [] },
+        { "clave": "INF5160", "nombre": "Lenguaje de Programación III", "horasTeoricas": 4, "horasPracticas": 0, "creditos": 4, "prerequisitos": ["INF5140","INF5150"], "equivalencias": [] },
+        { "clave": "INF5170", "nombre": "Lab Lenguaje de Program III", "horasTeoricas": 0, "horasPracticas": 2, "creditos": 1, "prerequisitos": ["INF5160"], "equivalencias": [] },
+        { "clave": "MAT3570", "nombre": "Cálculo II", "horasTeoricas": 4, "horasPracticas": 2, "creditos": 5, "prerequisitos": ["MAT3560"], "equivalencias": ["MAT3500"] }
+      ]
+    },
+    {
+      "numero": 6,
+      "nombre": "Sexto Semestre",
+      "totalHT": 15, "totalHP": 8, "totalHIV": 0, "totalHPV": 0, "totalHI": 0, "totalCreditos": 19,
+      "asignaturas": [
+        { "clave": "CON1190", "nombre": "Contabilidad General I", "horasTeoricas": 4, "horasPracticas": 2, "creditos": 5, "prerequisitos": ["MAT0140"], "equivalencias": ["CON1110"] },
+        { "clave": "INF3220", "nombre": "Algoritmos Computacionales", "horasTeoricas": 4, "horasPracticas": 2, "creditos": 5, "prerequisitos": ["INF5120","MAT3570"], "equivalencias": [] },
+        { "clave": "INF3240", "nombre": "Sistemas Operativos", "horasTeoricas": 3, "horasPracticas": 2, "creditos": 4, "prerequisitos": ["INF2080"], "equivalencias": [] },
+        { "clave": "INF4200", "nombre": "Base de Datos I", "horasTeoricas": 4, "horasPracticas": 2, "creditos": 5, "prerequisitos": ["INF5140"], "equivalencias": ["INF4240"] }
+      ]
+    },
+    {
+      "numero": 7,
+      "nombre": "Séptimo Semestre",
+      "totalHT": 16, "totalHP": 8, "totalHIV": 0, "totalHPV": 0, "totalHI": 0, "totalCreditos": 24,
+      "asignaturas": [
+        { "clave": "BIO2400", "nombre": "Bioética", "horasTeoricas": 2, "horasPracticas": 0, "creditos": 2, "prerequisitos": ["FIL0110","BIO0140"], "equivalencias": [] },
+        { "clave": "INF3290", "nombre": "Análisis y Diseño de Sistema", "horasTeoricas": 3, "horasPracticas": 2, "creditos": 5, "prerequisitos": ["INF4200"], "equivalencias": ["INF3230"] },
+        { "clave": "INF5200", "nombre": "Base de Datos II", "horasTeoricas": 4, "horasPracticas": 2, "creditos": 5, "prerequisitos": ["INF4200"], "equivalencias": [] },
+        { "clave": "INFZZA0", "nombre": "Asignatura Optativa I", "horasTeoricas": 0, "horasPracticas": 0, "creditos": 3, "prerequisitos": [], "equivalencias": [] },
+        { "clave": "MAT1430", "nombre": "Matemática Financiera", "horasTeoricas": 4, "horasPracticas": 2, "creditos": 5, "prerequisitos": ["MAT0140"], "equivalencias": ["MAT1410"] },
+        { "clave": "MAT3920", "nombre": "Matemática Discr para Computac", "horasTeoricas": 3, "horasPracticas": 2, "creditos": 4, "prerequisitos": ["MAT0140"], "equivalencias": [] }
+      ]
+    },
+    {
+      "numero": 8,
+      "nombre": "Octavo Semestre",
+      "totalHT": 13, "totalHP": 8, "totalHIV": 0, "totalHPV": 0, "totalHI": 0, "totalCreditos": 22,
+      "asignaturas": [
+        { "clave": "INF4250", "nombre": "Teleproceso", "horasTeoricas": 3, "horasPracticas": 2, "creditos": 4, "prerequisitos": ["INF3240","INF4260"], "equivalencias": [] },
+        { "clave": "INF4260", "nombre": "Redes De Proc De Datos", "horasTeoricas": 3, "horasPracticas": 2, "creditos": 4, "prerequisitos": ["INF3240","INF3220"], "equivalencias": [] },
+        { "clave": "INF5220", "nombre": "Ingeniería de Software I", "horasTeoricas": 3, "horasPracticas": 2, "creditos": 4, "prerequisitos": ["INF3240","INF5200"], "equivalencias": [] },
+        { "clave": "INFZZB0", "nombre": "Asignatura Optativa II", "horasTeoricas": 0, "horasPracticas": 0, "creditos": 5, "prerequisitos": [], "equivalencias": [] },
+        { "clave": "MAT3940", "nombre": "Investigación de Operaciones", "horasTeoricas": 4, "horasPracticas": 2, "creditos": 5, "prerequisitos": ["MAT3570"], "equivalencias": ["MAT3470"] }
+      ]
+    },
+    {
+      "numero": 9,
+      "nombre": "Noveno Semestre",
+      "totalHT": 9, "totalHP": 6, "totalHIV": 0, "totalHPV": 0, "totalHI": 0, "totalCreditos": 16,
+      "asignaturas": [
+        { "clave": "INF5230", "nombre": "Auditoría de Sist Informáticos", "horasTeoricas": 3, "horasPracticas": 2, "creditos": 4, "prerequisitos": ["INF3240","INF3290","INF4260"], "equivalencias": [] },
+        { "clave": "INF5240", "nombre": "Adm de Centros de Cómputos", "horasTeoricas": 3, "horasPracticas": 2, "creditos": 4, "prerequisitos": ["INF4260","INF3240"], "equivalencias": [] },
+        { "clave": "INF5250", "nombre": "Ingeniería de Software II", "horasTeoricas": 3, "horasPracticas": 2, "creditos": 4, "prerequisitos": ["INF5220"], "equivalencias": [] },
+        { "clave": "INFZZC0", "nombre": "Asignatura Optativa III", "horasTeoricas": 0, "horasPracticas": 0, "creditos": 4, "prerequisitos": [], "equivalencias": [] }
+      ]
+    }
+  ]
+}
