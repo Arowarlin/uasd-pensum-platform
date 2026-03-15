@@ -1,430 +1,298 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CalculadoraService } from '../../core/services/calculadora.service';
-import { Modalidad, NivelAcademico, Asignatura, Semestre, Carrera } from '../../core/models/pensum.models';
-
-interface FilaAsig {
-  clave: string; nombre: string; creditos: number;
-  horasTeoricas: number; horasPracticas: number; semestre: number;
-}
 
 @Component({
   selector: 'app-calculadora',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="page">
-      <div class="cab">
-        <h2>🧮 Calculadora de Horas y Créditos</h2>
-        <p>Ingresa asignaturas o carga CSV · Calcula HT · HP · HIV · HPV · HI por modalidad</p>
-      </div>
+    <div class="calc-wrap">
 
-      <div class="config">
-        <div class="cg">
-          <label>Modalidad</label>
-          <select [(ngModel)]="modalidad" (change)="calcularTodo()">
-            <option value="presencial">Presencial</option>
-            <option value="semipresencial">Semipresencial</option>
-            <option value="virtual">Virtual</option>
-          </select>
-        </div>
-        <div class="cg">
-          <label>Nivel Académico</label>
-          <select [(ngModel)]="nivel" (change)="calcularTodo()">
-            <option value="tecnico">Técnico Superior</option>
-            <option value="grado">Grado (Licenciatura)</option>
-            <option value="postgrado">Postgrado</option>
-          </select>
-        </div>
-        <div class="cg cg-wide">
-          <label>Nombre de la Carrera</label>
-          <input type="text" [(ngModel)]="nombreCarrera" placeholder="Ej. Licenciatura en Informática">
+      <div class="calc-header">
+        <div>
+          <h2>🧮 Calculadora de Horas</h2>
+          <p>Calcula horas academicas segun creditos, modalidad y nivel</p>
         </div>
       </div>
 
-      <div class="info-cr">
-        <strong>📐 1 Crédito =</strong>
-        <span>15 HT presenciales</span>
-        <span>30 HP presenciales</span>
-        <span class="v">15 HIV virtuales</span>
-        <span class="v">30 HPV virtuales</span>
-        <span class="v">45 HI investigación</span>
-      </div>
+      <div class="calc-body">
 
-      <div class="tabs">
-        <button [class.act]="tab==='manual'"    (click)="tab='manual'">✏️ Manual</button>
-        <button [class.act]="tab==='excel'"     (click)="tab='excel'">📂 CSV/Excel</button>
-        <button [class.act]="tab==='resultado'" (click)="tab='resultado'"
-                [disabled]="filas.length===0">📊 Resultados ({{ filas.length }})</button>
-      </div>
+        <div class="form-card">
+          <h3>⚙️ Parametros</h3>
 
-      @if (tab === 'manual') {
-        <div class="panel">
-          <h3>Agregar Asignatura</h3>
-          <div class="fgrid">
-            <div class="fg">
-              <label>Clave</label>
-              <input [(ngModel)]="nva.clave" placeholder="INF5100" maxlength="10">
-            </div>
-            <div class="fg fg2">
-              <label>Nombre de la Asignatura</label>
-              <input [(ngModel)]="nva.nombre" placeholder="Introducción a la Programación">
-            </div>
-            <div class="fg">
-              <label>Créditos (CR)</label>
-              <input type="number" [(ngModel)]="nva.creditos" min="1" max="10" (input)="autoCalc()">
-            </div>
-            <div class="fg">
-              <label>HT Teóricas</label>
-              <input type="number" [(ngModel)]="nva.horasTeoricas" min="0">
-            </div>
-            <div class="fg">
-              <label>HP Prácticas</label>
-              <input type="number" [(ngModel)]="nva.horasPracticas" min="0">
-            </div>
-            <div class="fg">
-              <label>Semestre #</label>
-              <input type="number" [(ngModel)]="nva.semestre" min="1" max="12">
+          <div class="field-row">
+            <div class="field">
+              <label>Nombre de la asignatura</label>
+              <input type="text" [(ngModel)]="nombre" placeholder="Ej. Calculo I" />
             </div>
           </div>
-          <div class="facciones">
-            <button class="btn-calc" (click)="autoCalc()">🔄 Auto-calcular</button>
-            <button class="btn-add"  (click)="agregar()">+ Agregar</button>
+
+          <div class="field-row three">
+            <div class="field">
+              <label>Creditos (CR)</label>
+              <input type="number" [(ngModel)]="creditos" min="1" max="10" placeholder="4" />
+            </div>
+            <div class="field">
+              <label>Horas Teoricas</label>
+              <input type="number" [(ngModel)]="horasT" min="0" max="10" placeholder="4" />
+            </div>
+            <div class="field">
+              <label>Horas Practicas</label>
+              <input type="number" [(ngModel)]="horasP" min="0" max="10" placeholder="2" />
+            </div>
           </div>
 
-          @if (nva.creditos > 0) {
-            <div class="preview">
-              <strong>Preview — {{ nva.creditos }} CR en modalidad {{ modalidad }}:</strong>
-              <div class="prev-items">
-                <span>HT: {{ calcService.calcularDesdeCredito(nva.creditos, modalidad).HT }}</span>
-                <span>HP: {{ calcService.calcularDesdeCredito(nva.creditos, modalidad).HP }}</span>
-                @if (modalidad !== 'presencial') {
-                  <span class="v">HIV: {{ calcService.calcularDesdeCredito(nva.creditos, modalidad).HIV }}</span>
-                  @if (modalidad === 'virtual') {
-                    <span class="v">HPV: {{ calcService.calcularDesdeCredito(nva.creditos, modalidad).HPV }}</span>
-                  }
-                  <span class="v">HI: {{ calcService.calcularDesdeCredito(nva.creditos, modalidad).HI }}</span>
-                }
+          <div class="field-row two">
+            <div class="field">
+              <label>Modalidad</label>
+              <div class="select-wrap">
+                <select [(ngModel)]="modalidad">
+                  <option value="presencial">Presencial</option>
+                  <option value="semipresencial">Semipresencial</option>
+                  <option value="virtual">Virtual</option>
+                </select>
               </div>
             </div>
-          }
-
-          @if (filas.length > 0) {
-            <div class="lista">
-              <div class="lista-head">
-                <h4>Asignaturas ({{ filas.length }})</h4>
-                <button class="btn-del-all" (click)="limpiar()">🗑 Limpiar todo</button>
+            <div class="field">
+              <label>Nivel Academico</label>
+              <div class="select-wrap">
+                <select [(ngModel)]="nivel">
+                  <option value="tecnico">Tecnico (60-120 CR)</option>
+                  <option value="grado">Grado (120-200 CR)</option>
+                  <option value="postgrado">Postgrado (30-80 CR)</option>
+                </select>
               </div>
-              <table class="mini">
-                <thead>
-                  <tr>
-                    <th>Sem</th><th>Clave</th><th>Asignatura</th>
-                    <th>CR</th><th>HT</th><th>HP</th>
-                    @if (modalidad !== 'presencial') {
-                      <th class="v">HIV</th><th class="v">HI</th>
-                    }
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (f of filas; track f.clave; let i = $index) {
-                    <tr>
-                      <td>{{ f.semestre }}</td>
-                      <td><code>{{ f.clave }}</code></td>
-                      <td>{{ f.nombre }}</td>
-                      <td class="cn">{{ f.creditos }}</td>
-                      <td class="cn">{{ f.horasTeoricas }}</td>
-                      <td class="cn">{{ f.horasPracticas }}</td>
-                      @if (modalidad !== 'presencial') {
-                        <td class="cn v">{{ calcService.calcularDesdeCredito(f.creditos, modalidad).HIV }}</td>
-                        <td class="cn v">{{ calcService.calcularDesdeCredito(f.creditos, modalidad).HI }}</td>
-                      }
-                      <td><button class="bdel" (click)="eliminar(i)">✕</button></td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-              <button class="btn-result" (click)="calcularTodo(); tab='resultado'">
-                Ver Resultados →
-              </button>
             </div>
-          }
+          </div>
+
+          <button class="btn-calc" (click)="calcular()">
+            🧮 Calcular Horas
+          </button>
         </div>
-      }
 
-      @if (tab === 'excel') {
-        <div class="panel">
-          <h3>📂 Cargar desde CSV o Excel</h3>
-          <p class="hint">Formato de columnas: <code>clave, nombre, creditos, HT, HP, semestre</code></p>
-          <div class="upload" (dragover)="$event.preventDefault()" (drop)="onDrop($event)">
-            <div class="up-icon">📂</div>
-            <p>Arrastra tu archivo aquí</p>
-            <label class="btn-file">
-              Seleccionar archivo .csv / .xlsx
-              <input type="file" accept=".xlsx,.xls,.csv" (change)="onFile($event)" hidden>
-            </label>
-          </div>
-          <div class="csv-box">
-            <h4>O pega datos CSV directamente</h4>
-            <p class="hint">Una asignatura por línea</p>
-            <textarea [(ngModel)]="csvTexto" rows="8"
-              placeholder="INF5100,Introducción a la Programación,4,4,0,2
-INF5110,Lab de Int a la Programación,1,0,2,2
-MAT0140,Matemática Básica,4,4,0,2"></textarea>
-            <button class="btn-add" (click)="parsearCSV()">📥 Importar</button>
-          </div>
-        </div>
-      }
+        @if (resultado) {
+          <div class="resultado-card" [class.show]="resultado">
+            <div class="res-header">
+              <h3>📊 Resultado: <em>{{ nombre || 'Asignatura' }}</em></h3>
+              <span class="modal-badge" [class]="modalidad">{{ modalidad }}</span>
+            </div>
 
-      @if (tab === 'resultado' && resultado) {
-        <div class="panel">
-          <h3>📊 Resultados — {{ nombreCarrera || 'Carrera' }}</h3>
-          <p class="rmeta">
-            Modalidad: <strong>{{ modalidad }}</strong> &nbsp;|&nbsp;
-            Nivel: <strong>{{ getLabelNivel() }}</strong> &nbsp;|&nbsp;
-            Semestres: <strong>{{ resultado.semestres.length }}</strong>
-          </p>
+            <div class="res-grid">
+              <div class="ri">
+                <span class="rv">{{ resultado.HT }}</span>
+                <span class="rl">Horas Teoricas</span>
+                <span class="rf">Presencial</span>
+              </div>
+              <div class="ri">
+                <span class="rv">{{ resultado.HP }}</span>
+                <span class="rl">Horas Practicas</span>
+                <span class="rf">Presencial</span>
+              </div>
+              <div class="ri virt" [class.dim]="modalidad==='presencial'">
+                <span class="rv">{{ resultado.HIV }}</span>
+                <span class="rl">Horas Ind. Virtual</span>
+                <span class="rf">Virtual/Semi</span>
+              </div>
+              <div class="ri virt" [class.dim]="modalidad!=='virtual'">
+                <span class="rv">{{ resultado.HPV }}</span>
+                <span class="rl">Horas Prac. Virtual</span>
+                <span class="rf">Solo Virtual</span>
+              </div>
+              <div class="ri virt" [class.dim]="modalidad==='presencial'">
+                <span class="rv">{{ resultado.HI }}</span>
+                <span class="rl">Horas Investigacion</span>
+                <span class="rf">Virtual/Semi</span>
+              </div>
+              <div class="ri total">
+                <span class="rv big">{{ resultado.total }}</span>
+                <span class="rl">TOTAL HORAS</span>
+              </div>
+            </div>
 
-          <div class="vbox" [class.vok]="validRes?.valido" [class.verr]="!validRes?.valido">
-            <strong>{{ validRes?.valido ? '✅ APROBADO' : '⚠️ OBSERVACIONES' }}</strong>
-            <ul>
-              @for (m of validRes?.mensajes; track m) { <li>{{ m }}</li> }
-            </ul>
-          </div>
-
-          @for (sem of resultado.semestres; track sem.numero) {
-            @if (sem.asignaturas.length > 0) {
-              <div class="rsem">
-                <div class="rsem-head">
-                  <span>Semestre {{ sem.numero }}</span>
-                  <span>
-                    {{ sem.totalCreditos }} CR | {{ sem.totalHT }} HT | {{ sem.totalHP }} HP
-                    @if (modalidad !== 'presencial') {
-                      | {{ sem.totalHIV }} HIV | {{ sem.totalHI }} HI
-                    }
-                  </span>
+            <div class="formula-box">
+              <div class="formula-title">📐 Formula aplicada — Modalidad {{ modalidad }}</div>
+              @if (modalidad === 'presencial') {
+                <div class="formula-items">
+                  <span>HT = {{ horasT }} × 15 = <strong>{{ resultado.HT }}</strong></span>
+                  <span>HP = {{ horasP }} × 30 = <strong>{{ resultado.HP }}</strong></span>
+                  <span>Total = HT + HP = <strong>{{ resultado.total }}</strong></span>
                 </div>
-                <table class="mini">
-                  <thead>
-                    <tr>
-                      <th>Clave</th><th>Asignatura</th><th>CR</th><th>HT</th><th>HP</th>
-                      @if (modalidad !== 'presencial') {
-                        <th class="v">HIV</th><th class="v">HPV</th><th class="v">HI</th>
-                      }
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (a of sem.asignaturas; track a.clave) {
-                      <tr>
-                        <td><code>{{ a.clave }}</code></td>
-                        <td>{{ a.nombre }}</td>
-                        <td class="cn">{{ a.creditos }}</td>
-                        <td class="cn">{{ calcService.calcularHorasAsignatura(a, modalidad).HT }}</td>
-                        <td class="cn">{{ calcService.calcularHorasAsignatura(a, modalidad).HP }}</td>
-                        @if (modalidad !== 'presencial') {
-                          <td class="cn v">{{ calcService.calcularHorasAsignatura(a, modalidad).HIV }}</td>
-                          <td class="cn v">{{ calcService.calcularHorasAsignatura(a, modalidad).HPV }}</td>
-                          <td class="cn v">{{ calcService.calcularHorasAsignatura(a, modalidad).HI }}</td>
-                        }
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            }
-          }
-
-          @if (totalesRes) {
-            <div class="tfinal">
-              <h4>Totales Finales de la Carrera</h4>
-              <div class="tgrid">
-                <div class="ti"><span class="tv">{{ totalesRes.CR }}</span><span class="tl">Créditos</span></div>
-                <div class="ti"><span class="tv">{{ totalesRes.HT }}</span><span class="tl">HT Pres.</span></div>
-                <div class="ti"><span class="tv">{{ totalesRes.HP }}</span><span class="tl">HP Pres.</span></div>
-                <div class="ti v"><span class="tv">{{ totalesRes.HIV }}</span><span class="tl">HIV Virtual</span></div>
-                <div class="ti v"><span class="tv">{{ totalesRes.HPV }}</span><span class="tl">HPV Virtual</span></div>
-                <div class="ti v"><span class="tv">{{ totalesRes.HI }}</span><span class="tl">HI Invest.</span></div>
-                <div class="ti pres"><span class="tv">{{ totalesRes.totalHorasPresenciales }}</span><span class="tl">Total Presencial</span></div>
-                <div class="ti virt"><span class="tv">{{ totalesRes.totalHorasVirtuales }}</span><span class="tl">Total Virtual</span></div>
-                <div class="ti big"><span class="tv">{{ totalesRes.totalGeneral }}</span><span class="tl">TOTAL GENERAL</span></div>
-              </div>
+              }
+              @if (modalidad === 'semipresencial') {
+                <div class="formula-items">
+                  <span>HT  = {{ horasT }} × 15 = <strong>{{ resultado.HT }}</strong></span>
+                  <span>HP  = {{ horasP }} × 30 = <strong>{{ resultado.HP }}</strong></span>
+                  <span>HIV = {{ creditos }} × 15 × 0.5 = <strong>{{ resultado.HIV }}</strong></span>
+                  <span>HI  = {{ creditos }} × 45 × 0.3 = <strong>{{ resultado.HI }}</strong></span>
+                  <span>Total = <strong>{{ resultado.total }}</strong></span>
+                </div>
+              }
+              @if (modalidad === 'virtual') {
+                <div class="formula-items">
+                  <span>HIV = {{ creditos }} × 15 = <strong>{{ resultado.HIV }}</strong></span>
+                  <span>HPV = {{ creditos }} × 30 = <strong>{{ resultado.HPV }}</strong></span>
+                  <span>HI  = {{ creditos }} × 45 = <strong>{{ resultado.HI }}</strong></span>
+                  <span>Total = <strong>{{ resultado.total }}</strong></span>
+                </div>
+              }
             </div>
-          }
+          </div>
+        }
+
+        <div class="ref-card">
+          <h3>📖 Referencia de Formulas UASD</h3>
+          <table class="ref-tbl">
+            <thead>
+              <tr>
+                <th>Modalidad</th>
+                <th>HT</th>
+                <th>HP</th>
+                <th>HIV</th>
+                <th>HPV</th>
+                <th>HI</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="mbadge pres">Presencial</span></td>
+                <td>HT × 15</td>
+                <td>HP × 30</td>
+                <td class="dim">0</td>
+                <td class="dim">0</td>
+                <td class="dim">0</td>
+              </tr>
+              <tr>
+                <td><span class="mbadge semi">Semipresencial</span></td>
+                <td>HT × 15</td>
+                <td>HP × 30</td>
+                <td>CR × 15 × 0.5</td>
+                <td class="dim">0</td>
+                <td>CR × 45 × 0.3</td>
+              </tr>
+              <tr>
+                <td><span class="mbadge virt">Virtual</span></td>
+                <td class="dim">0</td>
+                <td class="dim">0</td>
+                <td>CR × 15</td>
+                <td>CR × 30</td>
+                <td>CR × 45</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      }
+
+      </div>
     </div>
   `,
   styles: [`
-    .page { max-width:1100px; margin:0 auto; padding:1.5rem; }
-    .cab { text-align:center; margin-bottom:1.5rem; }
-    .cab h2 { font-size:1.8rem; color:#1a365d; }
-    .cab p { color:#718096; }
+    .calc-wrap { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-    .config { display:flex; gap:1rem; flex-wrap:wrap; background:white; padding:1.2rem; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.07); margin-bottom:1rem; }
-    .cg { display:flex; flex-direction:column; gap:4px; flex:1; min-width:160px; }
-    .cg-wide { flex:2; }
-    .cg label { font-size:0.75rem; font-weight:600; color:#4a5568; text-transform:uppercase; }
-    .cg select, .cg input { padding:8px 10px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.9rem; }
+    .calc-header {
+      background: linear-gradient(135deg, #1a365d, #2b6cb0);
+      border-radius: 14px; padding: 1.5rem 2rem;
+      color: white; margin-bottom: 1.5rem;
+    }
+    .calc-header h2 { margin: 0; font-size: 1.35rem; }
+    .calc-header p  { margin: 4px 0 0; opacity: 0.8; font-size: 0.85rem; }
 
-    .info-cr { background:#ebf8ff; border:1px solid #bee3f8; padding:10px 16px; border-radius:8px; margin-bottom:1rem; display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:0.83rem; }
-    .info-cr span { background:white; padding:3px 10px; border-radius:12px; border:1px solid #bee3f8; }
-    .info-cr .v { background:#e6fffa; border-color:#81e6d9; color:#276749; }
+    .calc-body { display: flex; flex-direction: column; gap: 1.2rem; }
 
-    .tabs { display:flex; gap:4px; margin-bottom:1rem; }
-    .tabs button { padding:8px 18px; border:1px solid #e2e8f0; border-radius:8px; background:white; cursor:pointer; font-size:0.88rem; }
-    .tabs button.act { background:#2b6cb0; color:white; border-color:#2b6cb0; }
-    .tabs button:disabled { opacity:0.4; cursor:not-allowed; }
+    .form-card { background: white; border-radius: 14px; padding: 1.8rem; box-shadow: 0 3px 15px rgba(0,0,0,0.08); }
+    .form-card h3 { margin: 0 0 1.3rem; color: #1a365d; font-size: 1rem; }
 
-    .panel { background:white; border-radius:10px; padding:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.07); }
-    .panel h3 { margin:0 0 1.2rem; color:#1a365d; }
-    .hint { color:#718096; font-size:0.83rem; margin-bottom:0.5rem; }
+    .field-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
+    .field-row.three { }
+    .field-row.two { }
+    .field { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+    .field label { font-size: 0.78rem; font-weight: 700; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px; }
+    .field input, .field select {
+      padding: 10px 13px; border: 2px solid #e2e8f0;
+      border-radius: 9px; font-size: 0.92rem; outline: none;
+      transition: border-color 0.2s; background: #f8fafc;
+    }
+    .field input:focus, .field select:focus { border-color: #3182ce; background: white; }
+    .select-wrap { position: relative; }
+    .select-wrap select { width: 100%; appearance: none; cursor: pointer; }
 
-    .fgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-bottom:1rem; }
-    .fg { display:flex; flex-direction:column; gap:4px; }
-    .fg2 { grid-column:span 2; }
-    .fg label { font-size:0.75rem; font-weight:600; color:#4a5568; }
-    .fg input { padding:8px; border:1px solid #e2e8f0; border-radius:6px; }
-    .facciones { display:flex; gap:10px; margin-bottom:1rem; }
-    .btn-calc { padding:8px 16px; background:#e2e8f0; border:none; border-radius:6px; cursor:pointer; }
-    .btn-add  { padding:8px 20px; background:#276749; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; }
-    .btn-result { margin-top:1rem; padding:10px 24px; background:#2b6cb0; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
-    .btn-del-all { background:none; border:1px solid #e53e3e; color:#e53e3e; padding:4px 12px; border-radius:6px; cursor:pointer; font-size:0.82rem; }
-    .bdel { background:none; border:none; color:#e53e3e; cursor:pointer; font-size:1rem; }
-    .btn-file { display:inline-block; padding:8px 20px; background:#2b6cb0; color:white; border-radius:6px; cursor:pointer; margin-top:0.5rem; }
+    .btn-calc {
+      width: 100%; padding: 13px; background: linear-gradient(135deg, #1a365d, #3182ce);
+      color: white; border: none; border-radius: 11px; font-size: 1rem; font-weight: 800;
+      cursor: pointer; transition: all 0.2s; margin-top: 0.5rem;
+      box-shadow: 0 4px 15px rgba(49,130,206,0.35);
+    }
+    .btn-calc:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(49,130,206,0.5); }
 
-    .preview { background:#f0fff4; border:1px solid #9ae6b4; padding:10px 14px; border-radius:8px; margin-bottom:1rem; font-size:0.86rem; }
-    .prev-items { display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
-    .prev-items span { background:white; padding:3px 12px; border-radius:10px; font-weight:600; }
-    .prev-items .v { color:#2b6cb0; }
+    .resultado-card {
+      background: white; border-radius: 14px; padding: 1.8rem;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+      border-top: 4px solid #3182ce;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .res-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.3rem; flex-wrap: wrap; gap: 0.5rem; }
+    .res-header h3 { margin: 0; color: #1a365d; font-size: 1rem; }
+    .res-header em { color: #3182ce; font-style: normal; }
+    .modal-badge { padding: 4px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .modal-badge.presencial     { background: #dcfce7; color: #166534; }
+    .modal-badge.semipresencial { background: #fef9c3; color: #854d0e; }
+    .modal-badge.virtual        { background: #dbeafe; color: #1d4ed8; }
 
-    .lista { margin-top:1.5rem; }
-    .lista-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
-    .lista-head h4 { margin:0; }
+    .res-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.2rem; }
+    .ri { background: #f8fafc; border-radius: 10px; padding: 1rem; text-align: center; }
+    .ri.virt  { background: #eff6ff; }
+    .ri.total { background: linear-gradient(135deg, #1a365d, #2b6cb0); grid-column: span 3; }
+    .ri.dim   { opacity: 0.4; }
+    .rv { display: block; font-size: 1.6rem; font-weight: 900; color: #2b6cb0; }
+    .rv.big { font-size: 2rem; color: white; }
+    .rl { display: block; font-size: 0.7rem; color: #64748b; text-transform: uppercase; margin-top: 2px; }
+    .ri.total .rl { color: rgba(255,255,255,0.7); }
+    .rf { display: block; font-size: 0.62rem; color: #94a3b8; margin-top: 1px; }
 
-    .mini { width:100%; border-collapse:collapse; font-size:0.84rem; }
-    .mini th { background:#f7fafc; padding:7px 10px; text-align:left; border-bottom:2px solid #e2e8f0; font-size:0.73rem; text-transform:uppercase; color:#4a5568; }
-    .mini td { padding:7px 10px; border-bottom:1px solid #f0f4f8; }
-    .mini tr:hover td { background:#f7fafc; }
-    .mini .v { color:#2b6cb0; }
-    .cn { text-align:center; }
-    code { background:#ebf8ff; color:#2b6cb0; padding:2px 5px; border-radius:3px; font-size:0.76rem; }
+    .formula-box { background: #1e293b; border-radius: 10px; padding: 1.2rem 1.5rem; }
+    .formula-title { font-size: 0.78rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.7rem; font-weight: 700; }
+    .formula-items { display: flex; flex-wrap: wrap; gap: 10px; }
+    .formula-items span { background: rgba(255,255,255,0.07); color: #e2e8f0; padding: 5px 12px; border-radius: 7px; font-size: 0.82rem; font-family: monospace; }
+    .formula-items strong { color: #63b3ed; }
 
-    .upload { border:2px dashed #bee3f8; border-radius:12px; padding:3rem; text-align:center; background:#f7faff; margin-bottom:1.5rem; }
-    .up-icon { font-size:3rem; margin-bottom:0.5rem; }
-    .csv-box { margin-top:1rem; }
-    .csv-box h4 { margin-bottom:0.5rem; }
-    .csv-box textarea { width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:8px; font-family:monospace; font-size:0.83rem; margin-bottom:0.5rem; resize:vertical; }
+    .ref-card { background: white; border-radius: 14px; padding: 1.8rem; box-shadow: 0 3px 15px rgba(0,0,0,0.08); }
+    .ref-card h3 { margin: 0 0 1.1rem; color: #1a365d; font-size: 1rem; }
+    .ref-tbl { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    .ref-tbl th { background: #f1f5f9; padding: 9px 12px; text-align: left; border-bottom: 2px solid #e2e8f0; font-size: 0.72rem; text-transform: uppercase; color: #64748b; }
+    .ref-tbl td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+    .ref-tbl td.dim { color: #cbd5e1; }
+    .mbadge { padding: 3px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; }
+    .mbadge.pres { background: #dcfce7; color: #166534; }
+    .mbadge.semi { background: #fef9c3; color: #854d0e; }
+    .mbadge.virt { background: #dbeafe; color: #1d4ed8; }
 
-    .rmeta { color:#718096; font-size:0.86rem; margin-bottom:1rem; }
-    .vbox { padding:1rem; border-radius:8px; margin-bottom:1.5rem; font-size:0.86rem; }
-    .vbox.vok  { background:#f0fff4; border-left:4px solid #38a169; color:#276749; }
-    .vbox.verr { background:#fff5f5; border-left:4px solid #e53e3e; color:#742a2a; }
-    .vbox ul { margin:0.5rem 0 0 1.2rem; line-height:1.9; }
-
-    .rsem { margin-bottom:1.5rem; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; }
-    .rsem-head { background:#f7fafc; padding:8px 14px; display:flex; justify-content:space-between; font-size:0.84rem; font-weight:600; border-bottom:1px solid #e2e8f0; }
-
-    .tfinal { margin-top:2rem; background:#f7fafc; border-radius:12px; padding:1.5rem; }
-    .tfinal h4 { margin:0 0 1rem; color:#1a365d; }
-    .tgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; }
-    .ti { background:white; border-radius:8px; padding:1rem; text-align:center; border:1px solid #e2e8f0; }
-    .ti.v { background:#ebf8ff; border-color:#bee3f8; }
-    .ti.pres { background:#f0fff4; border-color:#9ae6b4; }
-    .ti.virt { background:#e6fffa; border-color:#81e6d9; }
-    .ti.big { background:#1a365d; grid-column:span 2; border:none; }
-    .tv { display:block; font-size:1.5rem; font-weight:800; color:#2b6cb0; }
-    .ti.big .tv { color:#63b3ed; font-size:1.9rem; }
-    .tl { font-size:0.68rem; color:#718096; text-transform:uppercase; }
-    .ti.big .tl { color:rgba(255,255,255,0.7); }
+    @media(max-width:600px) {
+      .field-row { flex-direction: column; }
+      .res-grid { grid-template-columns: repeat(2,1fr); }
+      .ri.total { grid-column: span 2; }
+    }
   `]
 })
 export class CalculadoraComponent {
-  tab = 'manual';
-  modalidad: Modalidad = 'presencial';
-  nivel: NivelAcademico = 'grado';
-  nombreCarrera = '';
-  csvTexto = '';
-  nva: FilaAsig = { clave:'', nombre:'', creditos:3, horasTeoricas:3, horasPracticas:0, semestre:1 };
-  filas: FilaAsig[] = [];
-  resultado: Carrera | null = null;
-  totalesRes: any = null;
-  validRes: any = null;
+  nombre   = '';
+  creditos = 4;
+  horasT   = 4;
+  horasP   = 0;
+  modalidad: any = 'presencial';
+  nivel: any    = 'grado';
+  resultado: any = null;
 
-  constructor(public calcService: CalculadoraService) {}
+  constructor(private calc: CalculadoraService) {}
 
-  autoCalc() {
-    const h = this.calcService.calcularDesdeCredito(this.nva.creditos, this.modalidad);
-    this.nva.horasTeoricas  = h.HT;
-    this.nva.horasPracticas = h.HP;
-  }
-
-  agregar() {
-    if (!this.nva.clave || !this.nva.nombre) return;
-    this.filas.push({ ...this.nva });
-    this.nva = { clave:'', nombre:'', creditos:3, horasTeoricas:3, horasPracticas:0, semestre: this.nva.semestre };
-  }
-
-  eliminar(i: number) { this.filas.splice(i, 1); }
-  limpiar() { this.filas = []; this.resultado = null; }
-
-  calcularTodo() {
-    if (!this.filas.length) return;
-    const maxSem = Math.max(...this.filas.map(f => f.semestre));
-    const semestres: Semestre[] = [];
-    for (let i = 1; i <= maxSem; i++) {
-      const asigs: Asignatura[] = this.filas
-        .filter(f => f.semestre === i)
-        .map(f => ({
-          clave: f.clave, nombre: f.nombre, creditos: f.creditos,
-          horasTeoricas: f.horasTeoricas, horasPracticas: f.horasPracticas,
-          prerequisitos: [], equivalencias: []
-        }));
-      const s: Semestre = {
-        numero:i, nombre:`Semestre ${i}`, asignaturas: asigs,
-        totalHT:0, totalHP:0, totalHIV:0, totalHPV:0, totalHI:0, totalCreditos:0
-      };
-      semestres.push(this.calcService.calcularTotalesSemestre(s, this.modalidad));
-    }
-    this.resultado = {
-      id:'calc', codigo:'', nombre: this.nombreCarrera || 'Carrera',
-      facultad:'', escuela:'', plan:'', nivel: this.nivel, modalidad: this.modalidad,
-      semestres, totalHT:0, totalHP:0, totalHIV:0, totalHPV:0, totalHI:0, totalCreditos:0
+  calcular() {
+    const asig: any = {
+      clave: 'CALC', nombre: this.nombre || 'Asignatura',
+      horasTeoricas: Number(this.horasT),
+      horasPracticas: Number(this.horasP),
+      creditos: Number(this.creditos),
+      prerequisitos: [], equivalencias: []
     };
-    this.totalesRes  = this.calcService.calcularTotalesCarrera(this.resultado);
-    this.validRes    = this.calcService.validarCarrera(this.resultado);
-  }
-
-  parsearCSV() {
-    const lines = this.csvTexto.trim().split('\n');
-    for (const line of lines) {
-      const p = line.split(',').map(x => x.trim());
-      if (p.length >= 6) {
-        this.filas.push({
-          clave:p[0], nombre:p[1], creditos:+p[2],
-          horasTeoricas:+p[3], horasPracticas:+p[4], semestre:+p[5]
-        });
-      }
-    }
-    this.csvTexto = '';
-    this.tab = 'manual';
-  }
-
-  onFile(event: any) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e: any) => { this.csvTexto = e.target.result; this.parsearCSV(); };
-    reader.readAsText(file);
-  }
-
-  onDrop(event: DragEvent) {
-    event.preventDefault();
-    const file = event.dataTransfer?.files[0];
-    if (file) this.onFile({ target: { files: [file] } });
-  }
-
-  getLabelNivel() {
-    return { tecnico:'Técnico Superior', grado:'Grado (Licenciatura)', postgrado:'Postgrado' }[this.nivel];
+    this.resultado = this.calc.calcularHorasAsignatura(asig, this.modalidad);
   }
 }

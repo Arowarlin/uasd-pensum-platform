@@ -1,124 +1,94 @@
 import { Injectable } from '@angular/core';
-import {
-  Asignatura, Carrera, HorasCalculadas, Modalidad,
-  Semestre, HORAS_POR_CREDITO, LIMITES_POR_NIVEL, LimitesNivel
-} from '../models/pensum.models';
+import { Asignatura, Semestre, Carrera, Modalidad, Nivel } from '../models/pensum.models';
 
-export interface ResultadoValidacion {
-  valido: boolean;
-  mensajes: string[];
-  creditos: number;
-  limites: LimitesNivel;
-  porcentajeHT: number;
+export interface HorasAsignatura {
+  HT: number; HP: number; HIV: number; HPV: number; HI: number; total: number;
 }
 
 export interface TotalesCarrera {
-  HT: number; HP: number; HIV: number; HPV: number; HI: number; CR: number;
+  CR: number; HT: number; HP: number; HIV: number; HPV: number; HI: number;
   totalHorasPresenciales: number;
   totalHorasVirtuales: number;
   totalGeneral: number;
 }
 
+export interface ValidacionCarrera {
+  valido: boolean;
+  creditos: number;
+  mensajes: string[];
+  limites: { minCreditos: number; maxCreditos: number; minHT: number; maxHT: number };
+}
+
+const LIMITES: Record<any, { minCreditos: number; maxCreditos: number; minHT: number; maxHT: number }> = {
+  tecnico:   { minCreditos: 60,  maxCreditos: 120, minHT: 40, maxHT: 70 },
+  grado:     { minCreditos: 120, maxCreditos: 200, minHT: 40, maxHT: 75 },
+  postgrado: { minCreditos: 30,  maxCreditos: 80,  minHT: 30, maxHT: 60 },
+};
+
 @Injectable({ providedIn: 'root' })
 export class CalculadoraService {
 
-  calcularHorasAsignatura(asig: Asignatura, modalidad: Modalidad): HorasCalculadas {
-    const cr = asig.creditos;
+  calcularHorasAsignatura(a: Asignatura, modalidad: Modalidad): HorasAsignatura {
+    let HT = 0, HP = 0, HIV = 0, HPV = 0, HI = 0;
     switch (modalidad) {
       case 'presencial':
-        return {
-          HT: asig.horasTeoricas, HP: asig.horasPracticas,
-          HIV: 0, HPV: 0, HI: 0, CR: cr,
-          totalHoras: asig.horasTeoricas + asig.horasPracticas
-        };
+        HT  = a.horasTeoricas  * 15;
+        HP  = a.horasPracticas * 30;
+        break;
       case 'semipresencial':
-        const hivS = asig.horasInteraccionVirtual ?? Math.round(cr * HORAS_POR_CREDITO.HIV * 0.5);
-        const hiS  = asig.horasInvestigacion     ?? Math.round(cr * HORAS_POR_CREDITO.HI  * 0.3);
-        return {
-          HT: asig.horasTeoricas, HP: asig.horasPracticas,
-          HIV: hivS, HPV: 0, HI: hiS, CR: cr,
-          totalHoras: asig.horasTeoricas + asig.horasPracticas + hivS + hiS
-        };
+        HT  = a.horasTeoricas  * 15;
+        HP  = a.horasPracticas * 30;
+        HIV = Math.round(a.creditos * 15 * 0.5);
+        HI  = Math.round(a.creditos * 45 * 0.3);
+        break;
       case 'virtual':
-        const hivV = asig.horasInteraccionVirtual ?? cr * HORAS_POR_CREDITO.HIV;
-        const hpvV = asig.horasPracticasVirtuales ?? cr * HORAS_POR_CREDITO.HPV;
-        const hiV  = asig.horasInvestigacion      ?? cr * HORAS_POR_CREDITO.HI;
-        return {
-          HT: 0, HP: 0, HIV: hivV, HPV: hpvV, HI: hiV, CR: cr,
-          totalHoras: hivV + hpvV + hiV
-        };
+        HIV = a.creditos * 15;
+        HPV = a.creditos * 30;
+        HI  = a.creditos * 45;
+        break;
     }
+    return { HT, HP, HIV, HPV, HI, total: HT + HP + HIV + HPV + HI };
   }
 
-  calcularTotalesSemestre(semestre: Semestre, modalidad: Modalidad): Semestre {
-    let totalHT=0, totalHP=0, totalHIV=0, totalHPV=0, totalHI=0, totalCR=0;
-    for (const asig of semestre.asignaturas) {
-      const h = this.calcularHorasAsignatura(asig, modalidad);
-      totalHT+=h.HT; totalHP+=h.HP; totalHIV+=h.HIV;
-      totalHPV+=h.HPV; totalHI+=h.HI; totalCR+=h.CR;
-    }
-    return { ...semestre, totalHT, totalHP, totalHIV, totalHPV, totalHI, totalCreditos: totalCR };
+  calcularTotalesSemestre(sem: Semestre, modalidad: Modalidad): Semestre {
+    let tHT = 0, tHP = 0, tHIV = 0, tHPV = 0, tHI = 0, tCR = 0;
+    sem.asignaturas.forEach(a => {
+      const h = this.calcularHorasAsignatura(a, modalidad);
+      tHT += h.HT; tHP += h.HP; tHIV += h.HIV; tHPV += h.HPV; tHI += h.HI;
+      tCR += a.creditos;
+    });
+    return { ...sem, totalHT: tHT, totalHP: tHP, totalHIV: tHIV, totalHPV: tHPV, totalHI: tHI, totalCreditos: tCR };
   }
 
   calcularTotalesCarrera(carrera: Carrera): TotalesCarrera {
-    let HT=0, HP=0, HIV=0, HPV=0, HI=0, CR=0;
-    for (const sem of carrera.semestres) {
+    let CR = 0, HT = 0, HP = 0, HIV = 0, HPV = 0, HI = 0;
+    carrera.semestres.forEach(sem => {
       const s = this.calcularTotalesSemestre(sem, carrera.modalidad);
-      HT+=s.totalHT; HP+=s.totalHP; HIV+=s.totalHIV;
-      HPV+=s.totalHPV; HI+=s.totalHI; CR+=s.totalCreditos;
-    }
+      CR += s.totalCreditos; HT += s.totalHT; HP += s.totalHP;
+      HIV += s.totalHIV;     HPV += s.totalHPV; HI += s.totalHI;
+    });
     return {
-      HT, HP, HIV, HPV, HI, CR,
+      CR, HT, HP, HIV, HPV, HI,
       totalHorasPresenciales: HT + HP,
       totalHorasVirtuales: HIV + HPV + HI,
       totalGeneral: HT + HP + HIV + HPV + HI
     };
   }
 
-  validarCarrera(carrera: Carrera): ResultadoValidacion {
+  validarCarrera(carrera: Carrera): ValidacionCarrera {
     const totales = this.calcularTotalesCarrera(carrera);
-    const limites = LIMITES_POR_NIVEL[carrera.nivel];
+    const limites = LIMITES[carrera.nivel] || LIMITES['grado'];
     const mensajes: string[] = [];
-    let valido = true;
-
-    if (totales.CR < limites.minCreditos) {
-      valido = false;
-      mensajes.push(`❌ Créditos insuficientes: ${totales.CR} (mínimo ${limites.minCreditos})`);
-    } else if (totales.CR > limites.maxCreditos) {
-      valido = false;
-      mensajes.push(`❌ Créditos excedidos: ${totales.CR} (máximo ${limites.maxCreditos})`);
-    } else {
-      mensajes.push(`✅ Créditos en rango: ${totales.CR} (${limites.minCreditos}–${limites.maxCreditos})`);
-    }
-
-    const totalConCR = totales.CR * HORAS_POR_CREDITO.HT;
-    const porcHT = totalConCR > 0 ? Math.round((totales.HT / totalConCR) * 100) : 0;
-
-    if (porcHT < limites.minHTporc) {
-      mensajes.push(`⚠️ % HT bajo: ${porcHT}% (mínimo ${limites.minHTporc}%)`);
-    } else {
-      mensajes.push(`✅ Distribución HT correcta: ${porcHT}%`);
-    }
-
-    if (carrera.modalidad === 'virtual' && totales.HT > 0) {
-      valido = false;
-      mensajes.push(`❌ Modalidad virtual no puede tener HT presenciales`);
-    }
-
-    mensajes.push(`ℹ️ Total horas presenciales: ${totales.totalHorasPresenciales}`);
-    mensajes.push(`ℹ️ Total horas virtuales: ${totales.totalHorasVirtuales}`);
-
-    return { valido, mensajes, creditos: totales.CR, limites, porcentajeHT: porcHT };
-  }
-
-  calcularDesdeCredito(cr: number, modalidad: Modalidad) {
-    switch (modalidad) {
-      case 'presencial':
-        return { HT: cr*15, HP: cr*30, HIV: 0, HPV: 0, HI: 0 };
-      case 'semipresencial':
-        return { HT: Math.round(cr*15*0.5), HP: Math.round(cr*30*0.5), HIV: Math.round(cr*15*0.5), HPV: 0, HI: Math.round(cr*45*0.3) };
-      case 'virtual':
-        return { HT: 0, HP: 0, HIV: cr*15, HPV: cr*30, HI: cr*45 };
-    }
+    if (totales.CR < limites.minCreditos)
+      mensajes.push(`Creditos insuficientes: ${totales.CR} (minimo ${limites.minCreditos})`);
+    if (totales.CR > limites.maxCreditos)
+      mensajes.push(`Creditos excesivos: ${totales.CR} (maximo ${limites.maxCreditos})`);
+    const pctHT = totales.totalGeneral > 0
+      ? Math.round((totales.HT / totales.totalGeneral) * 100) : 0;
+    if (pctHT < limites.minHT)
+      mensajes.push(`% HT bajo: ${pctHT}% (minimo ${limites.minHT}%)`);
+    if (pctHT > limites.maxHT)
+      mensajes.push(`% HT alto: ${pctHT}% (maximo ${limites.maxHT}%)`);
+    return { valido: mensajes.length === 0, creditos: totales.CR, mensajes, limites };
   }
 }
